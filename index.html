@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI | Advanced Neural Workspace</title>
+    <!-- Importing Inter Font -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f111a;
+            --bg-sidebar: #1a1d2b;
+            --bg-card: #24283b;
+            --primary: #7aa2f7;
+            --secondary: #bb9af7;
+            --accent: #f7768e;
+            --text-main: #c0caf5;
+            --text-dim: #787c99;
+            --border: #292e42;
+            --success: #9ece6a;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- SIDEBAR SYSTEM --- */
+        .sidebar {
+            width: 300px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .brand { padding: 30px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.2rem; color: var(--primary); }
+        .logo-icon { width: 32px; height: 32px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border-radius: 8px; }
+
+        .nav-section { flex: 1; padding: 0 15px; overflow-y: auto; }
+        .nav-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; margin: 20px 10px 10px; }
+        
+        .nav-item {
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+            transition: var(--transition);
+            color: var(--text-dim);
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(122, 162, 247, 0.1); color: var(--primary); }
+
+        .usage-stats { padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { width: 65%; height: 100%; background: var(--secondary); }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-stage { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        .top-bar {
+            height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(15, 17, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .model-selector {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* --- CHAT ENGINE --- */
+        #viewport {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            padding: 40px 0 180px;
+        }
+
+        .message-row { padding: 30px 20%; display: flex; gap: 25px; animation: fadeIn 0.4s ease; }
+        .ai-row { background: rgba(36, 40, 59, 0.4); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+        .pfp { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; background-size: cover; border: 2px solid var(--border); }
+        .content-area { flex: 1; }
+        .content-area h4 { margin-bottom: 8px; font-size: 0.8rem; color: var(--text-dim); }
+        .text { line-height: 1.8; font-size: 1rem; color: var(--text-main); }
+
+        /* Code Block Styling */
+        pre {
+            background: #16161e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        /* --- INPUT SYSTEM --- */
+        .input-anchor {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            max-width: 900px;
+        }
+
+        .input-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-box textarea {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            min-height: 24px;
+            max-height: 200px;
+        }
+
+        .input-tools { display: flex; justify-content: space-between; align-items: center; }
+        .tool-icons { display: flex; gap: 15px; color: var(--text-dim); }
+        .tool-icons i { cursor: pointer; transition: 0.2s; font-size: 1.2rem; }
+        .tool-icons i:hover { color: var(--primary); }
+
+        .btn-send {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-send:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(122, 162, 247, 0.4); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-icon"></div>
+            NEXUS AI
+        </div>
+
+        <nav class="nav-section">
+            <div class="nav-label">Main Menu</div>
+            <div class="nav-item active">🏠 Dashboard</div>
+            <div class="nav-item">💬 Chat History</div>
+            <div class="nav-item">🧩 Plugins</div>
+            
+            <div class="nav-label">Workspace</div>
+            <div class="nav-item">📁 Shared Files</div>
+            <div class="nav-item">⚙️ Settings</div>
+        </nav>
+
+        <div class="usage-stats">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+                <span>Token Usage</span>
+                <span>12.4k / 20k</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-stage">
+        <header class="top-bar">
+            <div class="model-selector">🚀 Neural-Engine-v4 (Latest)</div>
+            <div style="display: flex; gap: 20px;">
+                <span style="color: var(--success)">● System Ready</span>
+                <span>🔔</span>
+                <div class="pfp" style="width: 25px; height: 25px; background-color: var(--secondary);"></div>
+            </div>
+        </header>
+
+        <div id="viewport">
+            <!-- Initial Message -->
+            <div class="message-row ai-row">
+                <div class="pfp" style="background-color: var(--primary);"></div>
+                <div class="content-area">
+                    <h4>NEXUS CORE</h4>
+                    <div class="text">
+                        System initialized. I am your advanced AI interface. How can we accelerate your workflow today?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-anchor">
+            <div class="input-box">
+                <textarea id="prompt" placeholder="Ask Nexus anything..." rows="1"></textarea>
+                <div class="input-tools">
+                    <div class="tool-icons">
+                        <span>📎</span> <span>📷</span> <span>🎙️</span> <span>🌐</span>
+                    </div>
+                    <button class="btn-send" onclick="processMessage()">Generate Response</button>
+                </div>
+            </div>
+            <p style="text-align: center; color: var(--text-dim); font-size: 0.7rem; margin-top: 15px;">
+                Enterprise Security Enabled • AES-256 Encrypted
+            </p>
+        </div>
+    </main>
+
+    <script>
+        const viewport = document.getElementById('viewport');
+        const prompt = document.getElementById('prompt');
+
+        // Auto-expand textarea
+        prompt.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        function processMessage() {
+            const val = prompt.value.trim();
+            if(!val) return;
+
+            // Render User Message
+            renderMessage('user', val);
+            prompt.value = '';
+            prompt.style.height = 'auto';
+
+            // Show simulated thinking
+            const loadingId = renderMessage('ai', 'Accessing neural weights...');
+
+            setTimeout(() => {
+                const responses = [
+                    "Analyzing query parameters... Logic sequence complete. I have generated the requested architecture.",
+                    "Connecting to cloud database... Retrieval successful. How would you like to proceed with this data?",
+                    "Synthesizing new code modules based on your specifications. Check the implementation below."
+                ];
+                const randomResp = responses[Math.floor(Math.random() * responses.length)];
+                updateAIReponse(loadingId, randomResp);
+            }, 1800);
+        }
+
+        function renderMessage(role, text) {
+            const id = Date.now();
+            const row = document.createElement('div');
+            row.className = `message-row ${role}-row`;
+            row.id = `msg-${id}`;
+            
+            const color = role === 'ai' ? 'var(--primary)' : 'var(--secondary)';
+            const name = role === 'ai' ? 'NEXUS CORE' : 'SUBSCRIBER';
+
+            row.innerHTML = `
+                <div class="pfp" style="background-color: ${color}"></div>
+                <div class="content-area">
+                    <h4>${name}</h4>
+                    <div class="text">${text}</div>
+                </div>
+            `;
+
+            viewport.appendChild(row);
+            viewport.scrollTop = viewport.scrollHeight;
+            return id;
+        }
+
+        function updateAIReponse(id, text) {
+            const target = document.getElementById(`msg-${id}`);
+            if(target) {
+                target.querySelector('.text').textContent = text;
+            }
+        }
+
+        // Global key listeners
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processMessage();
+            }
+        });
+    </script>
+</body>
+</html>
